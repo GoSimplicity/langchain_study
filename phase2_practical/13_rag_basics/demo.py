@@ -39,7 +39,7 @@ if not PINECONE_API_KEY or PINECONE_API_KEY == "your_pinecone_api_key_here":
     print("Pinecone 相关示例将被跳过\n")
     PINECONE_API_KEY = None
 
-model = init_chat_model("groq:llama-3.3-70b-versatile", api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
+model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
 
 
 def main():

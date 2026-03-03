@@ -37,7 +37,7 @@ if not OPENAI_API_KEY or not OPENAI_API_BASE or OPENAI_API_KEY == "your_openai_a
     )
 
 # 初始化模型（图像处理需要支持视觉的模型）
-model = init_chat_model("openai:gpt-4o-mini", api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
+model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
 
 # 图片目录
 IMAGES_DIR = Path(__file__).parent / "images"

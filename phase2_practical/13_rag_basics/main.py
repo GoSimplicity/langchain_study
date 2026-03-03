@@ -48,7 +48,7 @@ if not PINECONE_API_KEY or PINECONE_API_KEY == "your_pinecone_api_key_here":
     print("3. 在 .env 文件中设置 PINECONE_API_KEY=你的key")
     print("\n当前将跳过需要 Pinecone 的示例\n")
 
-model = init_chat_model("groq:llama-3.3-70b-versatile", api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
+model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
 
 
 # ============================================================================

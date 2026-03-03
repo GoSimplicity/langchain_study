@@ -27,7 +27,7 @@ MODEL_NAME = DEFAULT_MODEL if ":" in DEFAULT_MODEL else f"openai:{DEFAULT_MODEL}
 if not OPENAI_API_KEY or not OPENAI_API_BASE or OPENAI_API_KEY == "your_openai_api_key_here_replace_this":
     raise ValueError("请先设置 OPENAI_API_KEY 和 OPENAI_API_BASE")
 
-model = init_chat_model("groq:llama-3.3-70b-versatile", api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
+model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
 
 @tool
 def get_weather(city: str) -> str:
@@ -462,7 +462,7 @@ def example_7_builtin_middleware():
         tools=[],
         middleware=[
             SummarizationMiddleware(
-                model="groq:llama-3.3-70b-versatile",
+                model=MODEL_NAME,
                 max_tokens_before_summary=200  # 超过 200 token 就摘要
             )
         ],

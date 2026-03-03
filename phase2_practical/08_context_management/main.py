@@ -26,7 +26,7 @@ MODEL_NAME = DEFAULT_MODEL if ":" in DEFAULT_MODEL else f"openai:{DEFAULT_MODEL}
 if not OPENAI_API_KEY or not OPENAI_API_BASE or OPENAI_API_KEY == "your_openai_api_key_here_replace_this":
     raise ValueError("请先设置 OPENAI_API_KEY 和 OPENAI_API_BASE")
 
-model = init_chat_model("groq:llama-3.3-70b-versatile", api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
+model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
 
 @tool
 def calculator(operation: str, a: float, b: float) -> str:
@@ -107,7 +107,7 @@ def example_2_summarization_middleware():
         checkpointer=InMemorySaver(),
         middleware=[
             SummarizationMiddleware(
-                model="groq:llama-3.3-70b-versatile",
+                model=MODEL_NAME,
                 max_tokens_before_summary=500  # 超过 500 tokens 就摘要
             )
         ]
@@ -173,7 +173,7 @@ agent = create_agent(
     tools=[],
     middleware=[
         SummarizationMiddleware(
-            model="groq:llama-3.3-70b-versatile",  # 摘要模型
+            model=MODEL_NAME,  # 摘要模型
             max_tokens_before_summary=500,         # 500 tokens 触发
         )
     ],
@@ -316,7 +316,7 @@ def example_6_practical_customer_service():
         checkpointer=InMemorySaver(),
         middleware=[
             SummarizationMiddleware(
-                model="groq:llama-3.3-70b-versatile",
+                model=MODEL_NAME,
                 max_tokens_before_summary=800  # 适合客服场景
             )
         ]

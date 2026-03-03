@@ -27,7 +27,7 @@ MODEL_NAME = DEFAULT_MODEL if ":" in DEFAULT_MODEL else f"openai:{DEFAULT_MODEL}
 if not OPENAI_API_KEY or not OPENAI_API_BASE or OPENAI_API_KEY == "your_openai_api_key_here_replace_this":
     raise ValueError("请先设置 OPENAI_API_KEY 和 OPENAI_API_BASE")
 
-model = init_chat_model("groq:llama-3.3-70b-versatile", api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
+model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
 
 
 # ============================================================================
@@ -86,7 +86,7 @@ def example_2_with_fallbacks():
     primary_model = model
 
     # 备用模型（更可靠或更便宜）
-    fallback_model = init_chat_model("groq:llama-3.1-8b-instant", api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
+    fallback_model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
 
     # 配置降级
     llm_with_fallbacks = primary_model.with_fallbacks([fallback_model])
@@ -443,7 +443,7 @@ def example_7_combined():
     structured_primary = model.with_structured_output(ExtractedData)
 
     # 2. 配置备用模型（也要先创建结构化输出）
-    fallback_model = init_chat_model("groq:llama-3.1-8b-instant", api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
+    fallback_model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE)
     structured_fallback = fallback_model.with_structured_output(ExtractedData)
 
     # 3. 添加重试（在结构化输出之后）

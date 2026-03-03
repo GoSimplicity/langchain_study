@@ -60,7 +60,7 @@ def example_1_simple_invoke():
     # 初始化模型
     # 格式：init_chat_model("提供商:模型名称")
     model = init_chat_model(
-        "groq:llama-3.3-70b-versatile",  # Groq 提供的 Llama 3.3 模型
+        MODEL_NAME,  # Groq 提供的 Llama 3.3 模型
         api_key=OPENAI_API_KEY,
         base_url=OPENAI_API_BASE,
     )
@@ -93,7 +93,7 @@ def example_2_messages():
     print("="*70)
 
     model = init_chat_model(
-        "groq:llama-3.3-70b-versatile",
+        MODEL_NAME,
         api_key=OPENAI_API_KEY,
         base_url=OPENAI_API_BASE,
     )
@@ -141,7 +141,7 @@ def example_3_dict_messages():
     print("="*70)
 
     model = init_chat_model(
-        "groq:llama-3.3-70b-versatile",
+        MODEL_NAME,
         api_key=OPENAI_API_KEY,
         base_url=OPENAI_API_BASE,
     )
@@ -182,7 +182,7 @@ def example_4_model_parameters():
 
     # 创建一个温度较低的模型（更确定性）
     model_deterministic = init_chat_model(
-        "groq:llama-3.3-70b-versatile",
+        MODEL_NAME,
         api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE,
         temperature=0.0,  # 最确定性
         max_tokens=100    # 限制输出长度
@@ -202,7 +202,7 @@ def example_4_model_parameters():
 
     # 创建一个温度较高的模型（更随机）
     model_creative = init_chat_model(
-        "groq:llama-3.3-70b-versatile",
+        MODEL_NAME,
         api_key=OPENAI_API_KEY, base_url=OPENAI_API_BASE,
         temperature=1.5,  # 更有创造性
         max_tokens=100
@@ -234,7 +234,7 @@ def example_5_response_structure():
     print("="*70)
 
     model = init_chat_model(
-        "groq:llama-3.3-70b-versatile",
+        MODEL_NAME,
         api_key=OPENAI_API_KEY,
         base_url=OPENAI_API_BASE,
     )
@@ -279,7 +279,7 @@ def example_6_error_handling():
 
     try:
         model = init_chat_model(
-            "groq:llama-3.3-70b-versatile",
+            MODEL_NAME,
             api_key=OPENAI_API_KEY,
             base_url=OPENAI_API_BASE,
         )
@@ -305,9 +305,9 @@ def example_7_multiple_models():
 
     LangChain 1.0 的优势之一是可以轻松切换不同的模型提供商
     只需要修改模型字符串：
-    - "groq:llama-3.3-70b-versatile"
-    - "groq:mixtral-8x7b-32768"
-    - "groq:gemma2-9b-it"
+    - MODEL_NAME
+    - MODEL_NAME
+    - MODEL_NAME
     """
     print("\n" + "="*70)
     print("示例 7：对比不同模型的输出")
@@ -315,8 +315,8 @@ def example_7_multiple_models():
 
     # Groq 上可用的不同模型
     models_to_test = [
-        "groq:llama-3.3-70b-versatile",
-        "groq:mixtral-8x7b-32768",
+        MODEL_NAME,
+        MODEL_NAME,
     ]
 
     prompt = "用一句话解释什么是机器学习。"
