@@ -251,9 +251,9 @@ class TemplateLibrary:
 if __name__ == "__main__":
     """测试模板库"""
 
-    print("="*70)
+    print("=" * 70)
     print(" 提示词模板库示例")
-    print("="*70)
+    print("=" * 70)
 
     # 示例 1：翻译模板
     print("\n【示例 1：翻译模板】")
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     for msg in messages:
         print(f"  {msg.type}: {msg.content[:80]}...")
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print(" 提示：在实际项目中，直接导入使用这些模板")
     print(" from examples.template_library import TemplateLibrary")
-    print("="*70)
+    print("=" * 70)

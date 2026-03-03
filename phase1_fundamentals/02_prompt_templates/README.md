@@ -5,27 +5,27 @@
 通过本模块，你将学习：
 
 1. **为什么需要提示词模板**
-   - 字符串拼接的问题
-   - 模板的优势
+    - 字符串拼接的问题
+    - 模板的优势
 
 2. **PromptTemplate**
-   - 基本用法
-   - 变量替换
-   - 格式化方法
+    - 基本用法
+    - 变量替换
+    - 格式化方法
 
 3. **ChatPromptTemplate**
-   - 聊天消息模板
-   - 多角色支持
-   - 对话历史管理
+    - 聊天消息模板
+    - 多角色支持
+    - 对话历史管理
 
 4. **高级特性**
-   - 部分变量
-   - 模板组合
-   - 可复用模板库
+    - 部分变量
+    - 模板组合
+    - 可复用模板库
 
 5. **LCEL 链式调用**
-   - 模板与模型的组合
-   - 管道运算符
+    - 模板与模型的组合
+    - 管道运算符
 
 ---
 
@@ -44,6 +44,7 @@ prompt = f"你好 {user_name}，我来帮你学习 {topic}"
 ```
 
 **问题：**
+
 - ❌ 难以维护和修改
 - ❌ 容易出现格式错误
 - ❌ 不能复用
@@ -64,6 +65,7 @@ prompt = template.format(user_name="张三", topic="Python")
 ```
 
 **优势：**
+
 - ✅ **可复用** - 一个模板，多次使用
 - ✅ **可维护** - 模板和数据分离
 - ✅ **类型安全** - 自动验证变量
@@ -198,12 +200,12 @@ prompt = code_generator.format(
 
 **PromptTemplate vs ChatPromptTemplate：**
 
-| 特性 | PromptTemplate | ChatPromptTemplate |
-|------|----------------|-------------------|
-| 输出格式 | 纯文本字符串 | 消息列表 |
-| 角色支持 | ❌ 无 | ✅ system/user/assistant |
-| 对话历史 | ❌ 不支持 | ✅ 支持 |
-| 适用场景 | 简单提示 | 聊天、对话、多轮交互 |
+| 特性   | PromptTemplate | ChatPromptTemplate      |
+|------|----------------|-------------------------|
+| 输出格式 | 纯文本字符串         | 消息列表                    |
+| 角色支持 | ❌ 无            | ✅ system/user/assistant |
+| 对话历史 | ❌ 不支持          | ✅ 支持                    |
+| 适用场景 | 简单提示           | 聊天、对话、多轮交互              |
 
 #### 基本语法
 
@@ -221,11 +223,11 @@ template = ChatPromptTemplate.from_messages([
 
 #### 消息类型
 
-| 角色字符串 | 含义 | 用途 |
-|-----------|------|------|
-| `"system"` | 系统消息 | 设定 AI 的行为、角色、规则 |
-| `"user"` / `"human"` | 用户消息 | 用户的输入/问题 |
-| `"assistant"` / `"ai"` | AI 消息 | AI 的回复（用于对话历史） |
+| 角色字符串                  | 含义    | 用途              |
+|------------------------|-------|-----------------|
+| `"system"`             | 系统消息  | 设定 AI 的行为、角色、规则 |
+| `"user"` / `"human"`   | 用户消息  | 用户的输入/问题        |
+| `"assistant"` / `"ai"` | AI 消息 | AI 的回复（用于对话历史）  |
 
 #### 创建方法
 
@@ -372,6 +374,7 @@ messages = structured_template.format_messages(
 预填充某些固定不变的变量，创建模板的变体。
 
 **使用场景：**
+
 - 某些变量在所有调用中都相同
 - 需要为不同用户/场景创建定制模板
 
@@ -462,6 +465,7 @@ combined = template1 + template2
 # templates.py
 from langchain_core.prompts import ChatPromptTemplate
 
+
 class PromptLibrary:
     """可复用的提示词模板库"""
 
@@ -484,6 +488,7 @@ class PromptLibrary:
         ("system", "你是{subject}导师，学生水平：{level}"),
         ("user", "{question}")
     ])
+
 
 # 使用
 from templates import PromptLibrary
@@ -509,7 +514,7 @@ messages = PromptLibrary.TRANSLATOR.format_messages(
 输入 → 模板 → 模型 → 输出
 ```
 
-#### 使用管道运算符 `|`
+#### 使用管道运算符 `｜`
 
 ```python
 from langchain_core.prompts import ChatPromptTemplate
@@ -537,12 +542,12 @@ print(response.content)
 
 #### 链的优势
 
-| 优势 | 说明 |
-|------|------|
-| **简洁** | 一行代码完成多步操作 |
-| **可读** | 清晰展示数据流向 |
+| 优势      | 说明          |
+|---------|-------------|
+| **简洁**  | 一行代码完成多步操作  |
+| **可读**  | 清晰展示数据流向    |
 | **可组合** | 可以轻松添加/删除组件 |
-| **可复用** | 链本身可以作为组件 |
+| **可复用** | 链本身可以作为组件   |
 
 **详细内容将在后续模块学习。**
 
@@ -579,13 +584,14 @@ python main.py
 
 **A:**
 
-| 特性 | PromptTemplate | ChatPromptTemplate |
-|------|----------------|-------------------|
-| 输出 | 字符串 | 消息列表 |
-| 角色 | 无 | system/user/assistant |
-| 适用场景 | 简单提示 | 聊天、对话 |
+| 特性   | PromptTemplate | ChatPromptTemplate    |
+|------|----------------|-----------------------|
+| 输出   | 字符串            | 消息列表                  |
+| 角色   | 无              | system/user/assistant |
+| 适用场景 | 简单提示           | 聊天、对话                 |
 
 **建议：**
+
 - 简单场景 → `PromptTemplate`
 - 聊天场景 → `ChatPromptTemplate`（推荐）
 
@@ -654,6 +660,7 @@ template = PromptTemplate.from_template(
     "{greeting} {name}，{message}"
 )
 template_with_default = template.partial(greeting="你好")
+
 
 # 方法 2：在应用层处理
 def create_prompt(name, message, greeting="你好"):

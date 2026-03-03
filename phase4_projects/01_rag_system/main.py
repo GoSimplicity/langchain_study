@@ -41,10 +41,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_API_BASE = os.getenv("OPENAI_API_BASE")
 DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "Pro/MiniMaxAI/MiniMax-M2.5")
 MODEL_NAME = DEFAULT_MODEL if ":" in DEFAULT_MODEL else f"openai:{DEFAULT_MODEL}"
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_API_BASE = os.getenv("OPENAI_API_BASE")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "Pro/MiniMaxAI/MiniMax-M2.5")
-MODEL_NAME = DEFAULT_MODEL if ":" in DEFAULT_MODEL else f"openai:{DEFAULT_MODEL}"
 
 if not OPENAI_API_KEY or not OPENAI_API_BASE or OPENAI_API_KEY == "your_openai_api_key_here":
     raise ValueError(

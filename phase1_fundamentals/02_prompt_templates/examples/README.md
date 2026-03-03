@@ -69,8 +69,8 @@ python examples/template_library.py
 from examples.template_library import TemplateLibrary
 
 en_to_zh = TemplateLibrary.TRANSLATOR.partial(
-    source_lang="英语",
-    target_lang="中文"
+  source_lang="英语",
+  target_lang="中文"
 )
 
 # 使用
