@@ -1,6 +1,5 @@
 """
 测试脚本 - 验证对话历史管理
-==============================
 """
 
 import os
@@ -23,7 +22,7 @@ model = init_chat_model(MODEL_NAME, api_key=OPENAI_API_KEY, base_url=OPENAI_API_
 def test_conversation_memory():
     """测试 AI 是否记住对话"""
     print("\n测试：AI 对话记忆")
-    print("="*50)
+    print("=" * 50)
 
     conversation = [
         {"role": "system", "content": "你是助手"}
@@ -54,7 +53,7 @@ def test_conversation_memory():
 def test_optimize_history():
     """测试历史优化函数"""
     print("\n\n测试：历史优化")
-    print("="*50)
+    print("=" * 50)
 
     def keep_recent_messages(messages, max_pairs=3):
         system_msgs = [m for m in messages if m.get("role") == "system"]
@@ -92,17 +91,17 @@ def test_optimize_history():
 
 
 if __name__ == "__main__":
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print(" 运行测试")
-    print("="*50)
+    print("=" * 50)
 
     results = []
     results.append(test_conversation_memory())
     results.append(test_optimize_history())
 
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print(" 测试结果")
-    print("="*50)
+    print("=" * 50)
     print(f"通过: {sum(results)}/{len(results)}")
 
     if all(results):

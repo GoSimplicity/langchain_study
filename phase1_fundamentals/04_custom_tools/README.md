@@ -11,6 +11,7 @@
 ```python
 from langchain_core.tools import tool
 
+
 @tool
 def get_weather(city: str) -> str:
     """
@@ -28,12 +29,12 @@ def get_weather(city: str) -> str:
 
 ### 关键要点
 
-| 必需项 | 说明 |
-|-------|------|
-| `@tool` 装饰器 | 声明这是一个工具 |
+| 必需项           | 说明                     |
+|---------------|------------------------|
+| `@tool` 装饰器   | 声明这是一个工具               |
 | **docstring** | AI 读这个来理解工具用途 ⚠️ 非常重要！ |
-| 类型注解 | 参数和返回值的类型 |
-| 返回 `str` | 工具应该返回字符串（AI 最容易理解） |
+| 类型注解          | 参数和返回值的类型              |
+| 返回 `str`      | 工具应该返回字符串（AI 最容易理解）    |
 
 ## 工具的 docstring
 
@@ -63,6 +64,7 @@ def tool1(x: str) -> str:
     """做一些事情"""
     ...
 
+
 # ✅ 好：清晰明确
 @tool
 def search_products(query: str) -> str:
@@ -81,6 +83,7 @@ def search_products(query: str) -> str:
 ## 参数类型
 
 ### 1. 单参数
+
 ```python
 @tool
 def get_weather(city: str) -> str:
@@ -89,6 +92,7 @@ def get_weather(city: str) -> str:
 ```
 
 ### 2. 多参数
+
 ```python
 @tool
 def calculator(operation: str, a: float, b: float) -> str:
@@ -104,8 +108,10 @@ def calculator(operation: str, a: float, b: float) -> str:
 ```
 
 ### 3. 可选参数
+
 ```python
 from typing import Optional
+
 
 @tool
 def web_search(query: str, num_results: Optional[int] = 3) -> str:
@@ -124,6 +130,7 @@ def web_search(query: str, num_results: Optional[int] = 3) -> str:
 工具有两种调用方式：
 
 ### 1. 直接调用（测试用）
+
 ```python
 # 使用 .invoke() 方法
 result = get_weather.invoke({"city": "北京"})
@@ -131,6 +138,7 @@ print(result)  # "晴天，温度 15°C"
 ```
 
 ### 2. 绑定到模型（让 AI 调用）
+
 ```python
 from langchain.chat_models import init_chat_model
 
@@ -159,14 +167,16 @@ def my_tool(param: str) -> str:
     """工具描述"""
     ...
 
-print(my_tool.name)         # "my_tool"
+
+print(my_tool.name)  # "my_tool"
 print(my_tool.description)  # "工具描述"
-print(my_tool.args)         # 参数模式
+print(my_tool.args)  # 参数模式
 ```
 
 ## 最佳实践
 
 ### 1. 清晰的描述
+
 ```python
 # ✅ 好
 @tool
@@ -185,20 +195,26 @@ def search_flights(origin: str, destination: str, date: str) -> str:
 ```
 
 ### 2. 功能单一
+
 ```python
 # ❌ 不好：一个工具做太多事
 @tool
 def do_everything(action: str, data: str) -> str:
     """做各种事情"""
-    if action == "weather": ...
-    elif action == "calculate": ...
-    elif action == "search": ...
+    if action == "weather":
+        ...
+    elif action == "calculate":
+        ...
+    elif action == "search":
+        ...
+
 
 # ✅ 好：每个工具做一件事
 @tool
 def get_weather(city: str) -> str:
     """获取天气"""
     ...
+
 
 @tool
 def calculator(operation: str, a: float, b: float) -> str:
@@ -207,6 +223,7 @@ def calculator(operation: str, a: float, b: float) -> str:
 ```
 
 ### 3. 错误处理
+
 ```python
 @tool
 def divide(a: float, b: float) -> str:
@@ -227,6 +244,7 @@ def divide(a: float, b: float) -> str:
 ```
 
 ### 4. 返回字符串
+
 ```python
 # ✅ 好：返回字符串
 @tool
@@ -234,6 +252,7 @@ def get_user_info(user_id: str) -> str:
     """获取用户信息"""
     user = {"id": user_id, "name": "张三"}
     return json.dumps(user, ensure_ascii=False)  # 转成 JSON 字符串
+
 
 # ❌ 不好：返回字典（某些情况可能有问题）
 @tool
@@ -254,6 +273,7 @@ if __name__ == "__main__":
 ```
 
 运行测试：
+
 ```bash
 python tools/weather.py
 ```

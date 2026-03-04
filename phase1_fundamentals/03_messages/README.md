@@ -4,11 +4,11 @@
 
 ### 1. 三种消息类型
 
-| 角色 | 字典格式 | 对象格式 | 用途 |
-|------|---------|---------|------|
-| System | `{"role": "system", ...}` | `SystemMessage(...)` | 系统提示 |
-| User | `{"role": "user", ...}` | `HumanMessage(...)` | 用户输入 |
-| Assistant | `{"role": "assistant", ...}` | `AIMessage(...)` | AI 回复 |
+| 角色        | 字典格式                         | 对象格式                 | 用途    |
+|-----------|------------------------------|----------------------|-------|
+| System    | `{"role": "system", ...}`    | `SystemMessage(...)` | 系统提示  |
+| User      | `{"role": "user", ...}`      | `HumanMessage(...)`  | 用户输入  |
+| Assistant | `{"role": "assistant", ...}` | `AIMessage(...)`     | AI 回复 |
 
 **推荐：直接用字典，简洁！**
 
@@ -21,6 +21,7 @@ messages = [
 
 # ❌ 不推荐（太啰嗦）
 from langchain_core.messages import SystemMessage, HumanMessage
+
 messages = [
     SystemMessage(content="你是助手"),
     HumanMessage(content="你好")
@@ -106,12 +107,14 @@ def keep_recent_messages(messages, max_pairs=3):
     # 返回：system + 最近对话
     return system_msgs + recent
 
+
 # 使用
 optimized = keep_recent_messages(conversation, max_pairs=5)
 response = model.invoke(optimized)
 ```
 
 **原理：**
+
 - 总是保留 system 消息（定义角色）
 - 只保留最近 5 轮对话（10 条消息）
 - 丢弃更早的历史
@@ -187,12 +190,12 @@ r2 = model.invoke(conversation)  # 丢失了历史
 
 ## 核心总结
 
-| 要点 | 说明 |
-|------|------|
-| **格式** | 用字典，不用消息对象 |
-| **历史** | 每次必须传递完整历史 |
-| **保存** | 必须保存 AI 的回复 |
-| **优化** | 只保留最近 N 轮 |
+| 要点         | 说明             |
+|------------|----------------|
+| **格式**     | 用字典，不用消息对象     |
+| **历史**     | 每次必须传递完整历史     |
+| **保存**     | 必须保存 AI 的回复    |
+| **优化**     | 只保留最近 N 轮      |
 | **System** | 总是保留 system 消息 |
 
 ---

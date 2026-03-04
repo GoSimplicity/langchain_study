@@ -5,6 +5,7 @@
 **Agent = 模型 + 工具 + 自动决策**
 
 Agent 的关键能力：
+
 - 理解用户问题
 - 自动判断是否需要工具
 - 选择合适的工具
@@ -29,11 +30,11 @@ response = agent.invoke({
 
 ### 参数说明
 
-| 参数 | 说明 | 必需 |
-|-----|------|------|
-| `model` | 语言模型 | ✅ |
-| `tools` | 工具列表 | ✅ |
-| `system_prompt` | 系统提示，定义 Agent 行为 | ❌ |
+| 参数              | 说明               | 必需 |
+|-----------------|------------------|----|
+| `model`         | 语言模型             | ✅  |
+| `tools`         | 工具列表             | ✅  |
+| `system_prompt` | 系统提示，定义 Agent 行为 | ❌  |
 
 ## Agent 执行循环
 
@@ -84,6 +85,7 @@ def get_weather(city: str) -> str:
     """获取指定城市的天气信息"""  # ← AI 读这个！
     ...
 
+
 @tool
 def calculator(operation: str, a: float, b: float) -> str:
     """执行基本的数学计算"""  # ← AI 也读这个！
@@ -91,6 +93,7 @@ def calculator(operation: str, a: float, b: float) -> str:
 ```
 
 AI 会根据：
+
 1. 问题内容
 2. 每个工具的描述
 3. 自动选择最匹配的工具
@@ -118,16 +121,19 @@ response2 = agent.invoke({
 ### 1. Agent 不调用工具？
 
 **原因：**
+
 - 工具的 docstring 不清晰
 - 问题表述不明确
 - 模型认为不需要工具
 
 **解决：**
+
 ```python
 # ❌ 不好
 @tool
 def tool1(x: str) -> str:
     """做一些事情"""  # 太模糊
+
 
 # ✅ 好
 @tool
@@ -143,10 +149,12 @@ def get_weather(city: str) -> str:
 ### 2. Agent 选错工具？
 
 **原因：**
+
 - 多个工具的功能描述相似
 - 工具太多导致混淆
 
 **解决：**
+
 - 只给必要的工具
 - 工具描述要有明确区分
 - 在 system_prompt 中说明工具使用场景
@@ -159,10 +167,10 @@ response = agent.invoke({"messages": [...]})
 # response 是字典
 {
     "messages": [
-        HumanMessage(...),      # 用户问题
-        AIMessage(...),          # AI 工具调用
-        ToolMessage(...),        # 工具结果
-        AIMessage(...)           # 最终回答 ← 通常取这个
+        HumanMessage(...),  # 用户问题
+        AIMessage(...),  # AI 工具调用
+        ToolMessage(...),  # 工具结果
+        AIMessage(...)  # 最终回答 ← 通常取这个
     ]
 }
 
@@ -173,6 +181,7 @@ final_answer = response['messages'][-1].content
 ## 最佳实践
 
 ### 1. 工具配置
+
 ```python
 # ✅ 好：只给需要的工具
 agent = create_agent(
@@ -188,6 +197,7 @@ agent = create_agent(
 ```
 
 ### 2. System Prompt
+
 ```python
 agent = create_agent(
     model=model,
@@ -208,6 +218,7 @@ agent = create_agent(
 ```
 
 ### 3. 错误处理
+
 ```python
 try:
     response = agent.invoke({
