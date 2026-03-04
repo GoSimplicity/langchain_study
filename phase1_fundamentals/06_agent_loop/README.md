@@ -1,380 +1,97 @@
-# 06 - Agent Loop (Agent 执行循环)
+# 06 - Agent Loop（执行循环）
 
-## 核心概念
+这一章专门讲 Agent 在一次请求里的完整执行过程：分析问题、调用工具、接收结果、生成最终答案。
 
-**Agent 执行循环 = 自动化的"思考-行动-观察"过程**
+## 本章你会掌握
 
-Agent 不是一次性调用，而是一个循环：
-```
-用户问题 → AI 思考 → 调用工具 → 观察结果 → 继续思考 → 最终答案
-```
+- 如何读取 Agent 的完整消息历史
+- 如何判断是否触发了工具调用
+- `stream()` 的实时输出用法
+- 多步骤任务中的中间状态观测
+- 如何做执行过程调试
 
-## 执行循环详解
+## 文件说明
 
-### 完整流程
+- `main.py`：6 个示例，逐步拆解执行循环
+- `test.py`：最小可运行验证（包含 `invoke` 与 `stream`）
 
-```
-┌─────────────┐
-│ 用户提问    │
-│ HumanMessage│
-└──────┬──────┘
-       ↓
-┌─────────────┐
-│ AI 分析问题 │
-│ 需要工具？  │
-└──────┬──────┘
-       ↓ 是
-┌─────────────┐
-│ AI 决定调用 │
-│ AIMessage   │
-│ (tool_calls)│
-└──────┬──────┘
-       ↓
-┌─────────────┐
-│ 执行工具    │
-│ ToolMessage │
-└──────┬──────┘
-       ↓
-┌─────────────┐
-│ AI 看结果   │
-│ 生成答案    │
-│ AIMessage   │
-└─────────────┘
+## 运行前准备
+
+```env
+OPENAI_API_KEY=your_api_key
+OPENAI_API_BASE=https://api.openai.com/v1
+DEFAULT_MODEL=openai:gpt-4o-mini
 ```
 
-### 消息历史示例
+说明：
 
-```python
-response = agent.invoke({
-    "messages": [{"role": "user", "content": "25 乘以 8"}]
-})
+- `main.py` 和 `test.py` 都会检查 `OPENAI_API_BASE`。
+- 这两个脚本会从 `04_custom_tools/tools` 导入工具，建议在仓库根目录运行命令。
 
-# response['messages'] 包含：
-[
-    HumanMessage(content="25 乘以 8"),
-    AIMessage(tool_calls=[{
-        'name': 'calculator',
-        'args': {'operation': 'multiply', 'a': 25, 'b': 8}
-    }]),
-    ToolMessage(content="25.0 multiply 8.0 = 200.0"),
-    AIMessage(content="25 乘以 8 等于 200")
-]
+## 怎么运行
+
+```bash
+python 06_agent_loop/main.py
+python 06_agent_loop/test.py
 ```
 
-## 查看执行过程
+`main.py` 示例之间会暂停，按 Enter 继续。
 
-### 1. 查看完整历史
+## 示例导读（`main.py`）
 
-```python
-response = agent.invoke({"messages": [...]})
+1. `example_1_understand_loop`
+完整打印 `response['messages']`，看一轮调用的全链路。
 
-for msg in response['messages']:
-    print(f"{msg.__class__.__name__}: {msg.content}")
-```
+2. `example_2_streaming`
+使用 `agent.stream()` 实时接收输出片段。
 
-### 2. 获取最终答案
+3. `example_3_multi_step`
+复杂问题下的多次工具调用。
 
-```python
-# 最后一条消息就是最终答案
-final_answer = response['messages'][-1].content
-```
+4. `example_4_inspect_state`
+在流式过程中逐步输出状态，适合调试。
 
-### 3. 查看使用的工具
+5. `example_5_message_types`
+逐条解释 `HumanMessage`、`AIMessage`、`ToolMessage`。
 
-```python
-used_tools = []
-for msg in response['messages']:
-    if hasattr(msg, 'tool_calls') and msg.tool_calls:
-        for tc in msg.tool_calls:
-            used_tools.append(tc['name'])
+6. `example_6_best_practices`
+提取最终答案、统计工具使用、异常处理的实用写法。
 
-print(f"使用的工具: {used_tools}")
-```
+## 执行循环速记
 
-## 流式输出（Streaming）
+典型顺序如下：
 
-**用于实时显示 Agent 的进度**
+1. `HumanMessage`：用户问题
+2. `AIMessage`（带 `tool_calls`）：模型决定调用工具
+3. `ToolMessage`：工具返回结果
+4. `AIMessage`（无 `tool_calls`）：最终回答
 
-### 基本用法
+## 调试建议
 
-```python
-agent = create_agent(model=model, tools=tools)
-
-# 使用 .stream() 方法
-for chunk in agent.stream({"messages": [...]}):
-    # chunk 是状态更新
-    if 'messages' in chunk:
-        latest_msg = chunk['messages'][-1]
-        # 处理最新消息
-        print(latest_msg.content)
-```
-
-### 实时显示最终答案
-
-```python
-for chunk in agent.stream(input):
-    if 'messages' in chunk:
-        latest = chunk['messages'][-1]
-
-        # 只显示最终答案（不包含 tool_calls）
-        if hasattr(latest, 'content') and latest.content:
-            if not hasattr(latest, 'tool_calls') or not latest.tool_calls:
-                print(latest.content)
-```
-
-### stream vs invoke
-
-| 方法 | 返回 | 用途 |
-|-----|------|------|
-| `invoke()` | 完整结果 | 等待完成后一次性获取 |
-| `stream()` | 生成器 | 实时获取中间步骤 |
-
-## 消息类型
-
-### HumanMessage
-用户的输入
-
-```python
-HumanMessage(content="北京天气如何？")
-```
-
-### AIMessage（两种情况）
-
-**情况1：调用工具**
-```python
-AIMessage(
-    content="",
-    tool_calls=[{
-        'name': 'get_weather',
-        'args': {'city': '北京'},
-        'id': 'call_xxx'
-    }]
-)
-```
-
-**情况2：最终答案**
-```python
-AIMessage(content="北京今天晴天，温度 15°C")
-```
-
-### ToolMessage
-工具执行的结果
-
-```python
-ToolMessage(
-    content="晴天，温度 15°C",
-    name="get_weather"
-)
-```
-
-### SystemMessage
-系统指令（通过 `system_prompt` 设置）
-
-```python
-agent = create_agent(
-    model=model,
-    tools=tools,
-    system_prompt="你是一个helpful assistant"
-)
-```
-
-## 多步骤执行
-
-Agent 可以多次调用工具：
-
-```python
-# 问题：先算 10 + 20，然后乘以 3
-response = agent.invoke({
-    "messages": [{"role": "user", "content": "先算 10 + 20，然后乘以 3"}]
-})
-
-# Agent 可能会：
-# 1. 调用 calculator(add, 10, 20) → 30
-# 2. 调用 calculator(multiply, 30, 3) → 90
-# 3. 返回最终答案
-```
-
-统计工具调用次数：
-```python
-tool_calls_count = sum(
-    len(msg.tool_calls) if hasattr(msg, 'tool_calls') and msg.tool_calls else 0
-    for msg in response['messages']
-)
-```
-
-## 调试技巧
-
-### 1. 打印所有消息
-
-```python
-for i, msg in enumerate(response['messages'], 1):
-    print(f"\n--- 消息 {i}: {msg.__class__.__name__} ---")
-
-    if hasattr(msg, 'content'):
-        print(f"内容: {msg.content}")
-
-    if hasattr(msg, 'tool_calls') and msg.tool_calls:
-        for tc in msg.tool_calls:
-            print(f"工具: {tc['name']}, 参数: {tc['args']}")
-```
-
-### 2. 使用 stream 查看步骤
-
-```python
-step = 0
-for chunk in agent.stream(input):
-    step += 1
-    print(f"步骤 {step}:")
-    if 'messages' in chunk:
-        latest = chunk['messages'][-1]
-        print(f"  类型: {latest.__class__.__name__}")
-```
-
-### 3. 检查是否使用工具
-
-```python
-has_tool_calls = any(
-    hasattr(msg, 'tool_calls') and msg.tool_calls
-    for msg in response['messages']
-)
-
-if has_tool_calls:
-    print("Agent 使用了工具")
-else:
-    print("Agent 直接回答")
-```
+- 调试第一步：先打印完整 `messages`
+- 调试第二步：统计 `tool_calls` 次数和参数
+- 调试第三步：用 `stream()` 观察卡在哪个阶段
 
 ## 常见问题
 
-### 1. 如何知道 Agent 何时完成？
+### 1) 看不懂 `stream()` 输出
 
-**答：当 AIMessage 不包含 tool_calls 时**
+`stream()` 返回的是状态增量，不一定每个 chunk 都是最终文本。要关注最新消息类型。
 
-```python
-for msg in response['messages']:
-    if isinstance(msg, AIMessage):
-        if hasattr(msg, 'tool_calls') and msg.tool_calls:
-            print("还在调用工具...")
-        else:
-            print("完成！最终答案：", msg.content)
-```
+### 2) 最终答案提取错误
 
-### 2. Agent 可以调用多少次工具？
+一般取 `response['messages'][-1].content`，但调试时建议先打印全部消息确认结构。
 
-**答：默认没有限制，直到得到最终答案**
+### 3) 工具调用次数异常
 
-但可能会：
-- 超时
-- 达到 token 限制
-- 模型决定停止
+检查问题是否含多步任务，或 `system_prompt` 是否引导了分步求解。
 
-### 3. 如何限制工具调用次数？
+## 收官检查
 
-LangChain 1.0 的 `create_agent` 默认使用 LangGraph，可以通过配置限制：
+完成本章后，你应该能独立：
 
-```python
-# 注意：这是高级用法，后续会详细学习
-config = {
-    "recursion_limit": 5  # 最多 5 步
-}
+- 解释 Agent 一次调用中每条消息的作用
+- 用 `stream()` 做最小实时输出
+- 快速定位“没调工具”或“调错工具”的问题
 
-response = agent.invoke(input, config=config)
-```
-
-## 最佳实践
-
-### 1. 生产环境获取答案
-
-```python
-try:
-    response = agent.invoke(input)
-    final_answer = response['messages'][-1].content
-    return final_answer
-except Exception as e:
-    logger.error(f"Agent 错误: {e}")
-    return "抱歉，出现错误"
-```
-
-### 2. 用户体验优化
-
-```python
-# 使用流式输出
-print("正在思考...")
-for chunk in agent.stream(input):
-    if 'messages' in chunk:
-        latest = chunk['messages'][-1]
-        # 显示进度
-```
-
-### 3. 调试和监控
-
-```python
-response = agent.invoke(input)
-
-# 记录使用的工具
-tools_used = [
-    tc['name']
-    for msg in response['messages']
-    if hasattr(msg, 'tool_calls') and msg.tool_calls
-    for tc in msg.tool_calls
-]
-
-logger.info(f"工具使用: {tools_used}")
-```
-
-### 4. 错误处理
-
-```python
-try:
-    response = agent.invoke(input)
-
-    # 检查是否成功
-    if not response['messages']:
-        raise ValueError("没有收到响应")
-
-    final = response['messages'][-1]
-    if not hasattr(final, 'content') or not final.content:
-        raise ValueError("没有最终答案")
-
-    return final.content
-
-except Exception as e:
-    # 记录详细错误
-    logger.error(f"Agent 执行失败: {e}", exc_info=True)
-    return None
-```
-
-## 运行示例
-
-```bash
-# 运行所有示例
-python main.py
-
-# 测试
-python test.py
-```
-
-## 核心要点总结
-
-1. **执行循环**：问题 → 工具调用 → 结果 → 答案
-2. **messages 历史**：记录完整对话过程
-3. **流式输出**：`stream()` 实时显示进度
-4. **消息类型**：HumanMessage、AIMessage、ToolMessage
-5. **最终答案**：`response['messages'][-1].content`
-
-## 下一步
-
-**阶段一（基础）完成！**
-
-已学习：
-- 01: 环境搭建和模型调用
-- 02: 提示词模板
-- 03: 消息类型和对话
-- 04: 自定义工具
-- 05: Simple Agent
-- 06: Agent 执行循环
-
-**下一阶段：phase2_intermediate**
-- 内存和状态管理
-- 中间件架构
-- 结构化输出
+这意味着 Phase 1 的核心能力已经完整闭环。

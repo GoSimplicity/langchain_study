@@ -1,206 +1,84 @@
-# 03 - Messages: 消息类型与对话管理
+# 03 - Messages（消息与对话状态）
 
-## 核心要点（只讲难点）
+这一章的核心是：模型本身不记忆，记忆来自你每次传入的 `messages`。
 
-### 1. 三种消息类型
+## 本章你会掌握
 
-| 角色        | 字典格式                         | 对象格式                 | 用途    |
-|-----------|------------------------------|----------------------|-------|
-| System    | `{"role": "system", ...}`    | `SystemMessage(...)` | 系统提示  |
-| User      | `{"role": "user", ...}`      | `HumanMessage(...)`  | 用户输入  |
-| Assistant | `{"role": "assistant", ...}` | `AIMessage(...)`     | AI 回复 |
+- `system / user / assistant` 三类消息职责
+- 多轮对话历史的正确维护方式
+- 不传历史时为什么会“失忆”
+- 用滑动窗口截断历史，平衡效果与成本
 
-**推荐：直接用字典，简洁！**
+## 文件说明
 
-```python
-# ✅ 推荐
-messages = [
-    {"role": "system", "content": "你是助手"},
-    {"role": "user", "content": "你好"}
-]
+- `main.py`：5 个示例，从消息格式到历史优化
+- `test.py`：两个基础测试（记忆测试、历史截断测试）
 
-# ❌ 不推荐（太啰嗦）
-from langchain_core.messages import SystemMessage, HumanMessage
+## 运行前准备
 
-messages = [
-    SystemMessage(content="你是助手"),
-    HumanMessage(content="你好")
-]
+```env
+OPENAI_API_KEY=your_api_key
+OPENAI_API_BASE=https://api.openai.com/v1
+DEFAULT_MODEL=openai:gpt-4o-mini
 ```
 
----
+说明：
 
-### 2. 对话历史管理（核心难点）
+- `main.py` 只强依赖 `OPENAI_API_KEY`。
+- `test.py` 会同时检查 `OPENAI_API_KEY` 和 `OPENAI_API_BASE`。
 
-#### 🔴 关键规则
-
-> **每次调用必须传递完整的对话历史！**
-
-#### ❌ 错误做法
-
-```python
-# 第一次
-r1 = model.invoke("我叫张三")
-
-# 第二次（没传历史）
-r2 = model.invoke("我叫什么？")  # AI 不记得！
-```
-
-#### ✅ 正确做法
-
-```python
-conversation = []
-
-# 第一次
-conversation.append({"role": "user", "content": "我叫张三"})
-r1 = model.invoke(conversation)
-
-# 关键：保存 AI 回复
-conversation.append({"role": "assistant", "content": r1.content})
-
-# 第二次（传递完整历史）
-conversation.append({"role": "user", "content": "我叫什么？"})
-r2 = model.invoke(conversation)  # AI 记得！
-```
-
-#### 💡 对话流程
-
-```
-第 1 轮：
-  [system, user] → AI回复 → 保存回复
-
-第 2 轮：
-  [system, user, assistant, user] → AI回复 → 保存回复
-
-第 3 轮：
-  [system, user, assistant, user, assistant, user] → AI回复
-
-每次都传递所有历史！
-```
-
----
-
-### 3. 对话历史优化（避免太长）
-
-#### 🔴 问题
-
-对话历史会越来越长，消耗大量 tokens 和成本。
-
-#### ✅ 解决方案
-
-只保留最近 N 轮对话：
-
-```python
-def keep_recent_messages(messages, max_pairs=3):
-    """
-    保留最近的 N 轮对话
-
-    max_pairs: 保留的对话轮数（每轮 = user + assistant）
-    """
-    # 分离 system 和对话
-    system_msgs = [m for m in messages if m.get("role") == "system"]
-    conversation = [m for m in messages if m.get("role") != "system"]
-
-    # 只保留最近的
-    recent = conversation[-(max_pairs * 2):]
-
-    # 返回：system + 最近对话
-    return system_msgs + recent
-
-
-# 使用
-optimized = keep_recent_messages(conversation, max_pairs=5)
-response = model.invoke(optimized)
-```
-
-**原理：**
-
-- 总是保留 system 消息（定义角色）
-- 只保留最近 5 轮对话（10 条消息）
-- 丢弃更早的历史
-
----
-
-## 完整示例
-
-### 正确的对话管理
-
-```python
-# 初始化
-conversation = [
-    {"role": "system", "content": "你是 Python 导师"}
-]
-
-# 第 1 轮
-conversation.append({"role": "user", "content": "什么是列表？"})
-r1 = model.invoke(conversation)
-conversation.append({"role": "assistant", "content": r1.content})
-
-# 第 2 轮
-conversation.append({"role": "user", "content": "它和元组有什么区别？"})
-r2 = model.invoke(conversation)
-conversation.append({"role": "assistant", "content": r2.content})
-
-# 第 3 轮（测试记忆）
-conversation.append({"role": "user", "content": "我第一个问题问的是什么？"})
-r3 = model.invoke(conversation)
-# AI 会回答："你问的是什么是列表"
-
-# 优化：只保留最近 3 轮
-optimized = keep_recent_messages(conversation, max_pairs=3)
-```
-
----
-
-## 运行示例
+## 怎么运行
 
 ```bash
-cd phase1_fundamentals/03_messages
-python main.py
+python 03_messages/main.py
+python 03_messages/test.py
 ```
 
----
+`main.py` 示例之间会暂停，按 Enter 继续。
 
-## 常见错误
+## 示例导读（`main.py`）
 
-### 错误 1：忘记保存 AI 回复
+1. `example_1_message_types`
+对比消息对象和字典格式，建议生产里优先字典格式。
 
-```python
-# ❌ 错误
-conversation.append({"role": "user", "content": "问题1"})
-r1 = model.invoke(conversation)
-# 忘记保存 r1.content！
+2. `example_2_conversation_history`
+演示正确追加历史：用户消息 + AI 回复都要入栈。
 
-conversation.append({"role": "user", "content": "问题2"})
-r2 = model.invoke(conversation)  # AI 不知道之前的回答
-```
+3. `example_3_wrong_way`
+反例：每次独立调用，不带历史，模型无法参考前文。
 
-### 错误 2：每次重新创建列表
+4. `example_4_optimize_history`
+实现滑动窗口：保留 system + 最近 N 轮对话。
 
-```python
-# ❌ 错误
-conversation = [{"role": "user", "content": "问题1"}]
-r1 = model.invoke(conversation)
+5. `example_5_simple_chatbot`
+把上述机制组合成一个极简“带记忆”聊天流程。
 
-conversation = [{"role": "user", "content": "问题2"}]  # 重新创建！
-r2 = model.invoke(conversation)  # 丢失了历史
-```
+## 实战规则（建议记住）
 
----
+- 每轮调用前：把新 `user` 消息 append 到 `messages`
+- 调用后：把 `assistant` 回复 append 回去
+- 下一轮：带完整历史再次调用
 
-## 核心总结
+## 常见问题
 
-| 要点         | 说明             |
-|------------|----------------|
-| **格式**     | 用字典，不用消息对象     |
-| **历史**     | 每次必须传递完整历史     |
-| **保存**     | 必须保存 AI 的回复    |
-| **优化**     | 只保留最近 N 轮      |
-| **System** | 总是保留 system 消息 |
+### 1) 第二轮开始答非所问
 
----
+优先检查是否把上一轮 AI 回复写回历史。
 
-## 下一步
+### 2) 历史越来越长，成本飙升
 
-- **04_custom_tools** - 创建自定义工具
-- **05_simple_agent** - 构建第一个 Agent
+加入窗口策略，只保留最近几轮；`system` 消息通常保留。
+
+### 3) 用对象消息还是字典消息
+
+两种都能用。若涉及存储/序列化/接口传输，字典消息更省事。
+
+## 建议练习
+
+- 把窗口大小从 2 轮改到 5 轮，观察回答变化
+- 给 system 增加风格限制，观察是否稳定生效
+- 在 `test.py` 里补一个“未保存 assistant 回复”的失败测试
+
+## 下一章
+
+进入 `04_custom_tools`：让模型不仅“会说”，还能“调用函数做事”。
